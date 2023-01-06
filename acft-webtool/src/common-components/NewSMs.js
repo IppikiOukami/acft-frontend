@@ -1,11 +1,13 @@
 import React, {useEffect, useState} from "react";
 import Select from "react-select";
 import {MOS} from "../utils/Alphabet";
-import {TextField} from "@mui/material";
+import {addSMs} from "../utils/AxiosCalls";
+import {useNavigate} from "react-router-dom";
 
-let group = [];
+let group = "";
 export default function NewSMs(){
-
+    const navigate = useNavigate();
+    const [clear, setClear] = useState(false);
     const [first, setFirst] = useState('');
     const [last, setLast] = useState('');
     const [id, setId] = useState('');
@@ -14,15 +16,31 @@ export default function NewSMs(){
     const [dob, setDob] = useState('');
     const [gender, setGender] = useState('');
     const [mos, setMos] = useState('');
-    const [clear, setClear] = useState(false);
 
     function validate(){
-        if(!first || !/^[A-Za-z]/.test(first)){
+        if(!first || !/^[A-Z]+[a-z]*/.test(first)){
             alert("First name is required and must not contain numbers!");
             return false;
         }
-        if(!last || !/^[A-Za-z]/.test(last)){
+        if(!last || !/^[A-Z]+[a-z]*/.test(last)){
             alert("Last name is required and mist not contain numbers!");
+            return false;
+        }
+        if(!id || !/\d\d\d\d\d\d\d\d\d\d/.test(id) || id.length !== 10){
+            alert("DOD ID is invalid!");
+            return false;
+        }
+        if(!platoon || !/^[0-9]*$/.test(platoon) || platoon.length > 2){
+            alert("Platoon number is invalid!");
+            return false;
+        }
+        if(!doa || !/\d\d\d\d\d\d\d\d/.test(doa)){
+            alert("Invalid Date of Arrival!");
+            return false;
+        }
+        if(!dob || !/\d\d\d\d\d\d\d\d/.test(dob)){
+            alert("Invalid Date of Birth!");
+            return false;
         }
         return true;
     }
@@ -36,13 +54,20 @@ export default function NewSMs(){
     }
 
     function complete(){
+        group += ["1","1","0","1","1","1","1","1","1"];
+        group += [":"];
+        group += ["2","2","0","2","2","2","2","2","2"];
         // push to dbd
-        if(id !== ''){
-            group.push([id, platoon, '0', doa, dob, first, last, gender, mos]);
-        }
+        //if(id !== ''){
+        //    group.push([id, platoon, '0', doa, dob, first, last, gender, mos]);
+        //}
         setClear(true);
         console.log(group);
-        group = [];
+        if(addSMs(group)){
+            group = '';
+            navigate('/company');
+        }
+        alert("Error posting to backend!");
     }
 
     useEffect(() => {
